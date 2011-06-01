@@ -53,7 +53,8 @@ def crawl(current, terms=None):
         for shit in chain(soup.findAll('i'), soup.findAll('table')):
             shit.extract()
 
-        for paragraph in soup.findAll('p'):        
+        anchor = None
+        for paragraph in chain(soup.findAll('p'), soup.findAll('li')):
             #Kill params
             non_paren = ''
             paren_count = 0
@@ -72,10 +73,12 @@ def crawl(current, terms=None):
                 if paren_count == 0:
                     non_paren += i
             soup2 = BeautifulSoup(non_paren)
-            anchor = soup2.find('a', href=re.compile('^/wiki/'))
+            anchor = soup2.find('a', href=re.compile('^/wiki/[^\:]+$'))
             if anchor:
                 current = 'http://en.wikipedia.org' + dict(anchor.attrs)['href']
                 break
+        if anchor is None:
+            print 'Could not find trail from %s' % current
         count += 1
     return hits
 

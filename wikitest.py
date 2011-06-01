@@ -2,9 +2,12 @@
 Not italicized, not in parens.
 """
 
-import urllib2, re
+import urllib2, re, sys
+from collections import namedtuple
 from itertools import chain
 from BeautifulSoup import BeautifulSoup
+
+Article = namedtuple('WikiArticle', 'url title')
 
 max_hops = 50
 user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_7) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.71 Safari/534.24'
@@ -14,10 +17,9 @@ stop_url = 'http://en.wikipedia.org/wiki/Philosophy'
 
 def crawl(current):
     count = 0
-    path = []
+    hits = []
     
     while True:
-        path.append(current)
         if count >= max_hops:
             print 'Maximum Hops Reached'
             break
@@ -37,6 +39,9 @@ def crawl(current):
         html = response.read()
     
         soup = BeautifulSoup(html)
+        title = soup.find('h1', id='firstHeading')
+        hits.append(Article(current, title and title.text or None))
+        
         #Remove Shit
         for shit in chain(soup.findAll('i'), soup.findAll('table')):
             shit.extract()
@@ -65,8 +70,9 @@ def crawl(current):
                 current = 'http://en.wikipedia.org' + dict(anchor.attrs)['href']
                 break
         count += 1
-    return path
+    return hits
 
 if __name__ == '__main__':
-    crawl(sys.argv[1])
+    hits = crawl(sys.argv[1] if len(sys.argv) > 1 else 'http://en.wikipedia.org/wiki/Special:Random')
+    print hits
     

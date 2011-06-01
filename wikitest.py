@@ -14,8 +14,10 @@ stop_url = 'http://en.wikipedia.org/wiki/Philosophy'
 
 def crawl(current):
     count = 0
+    path = []
     
     while True:
+        path.append(current)
         if count >= max_hops:
             print 'Maximum Hops Reached'
             break
@@ -63,4 +65,8 @@ def crawl(current):
                 current = 'http://en.wikipedia.org' + dict(anchor.attrs)['href']
                 break
         count += 1
+    return path
 
+if __name__ == '__main__':
+    crawl(sys.argv[1])
+    

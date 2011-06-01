@@ -15,7 +15,7 @@ user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_7) AppleWebKit/534.24 
 stop_url = 'http://en.wikipedia.org/wiki/Philosophy'
 
 
-def crawl(current):
+def crawl(current, terms=None):
     count = 0
     hits = []
     
@@ -23,9 +23,16 @@ def crawl(current):
         if count >= max_hops:
             print 'Maximum Hops Reached'
             break
+        if terms is not None and current in terms:
+            print 'FOUND KNOWN TERM', current
+            hits.append(Article(current, terms[current]['title']))
+            break
         if current == stop_url:
             print current
             print 'FOUND PHILOSOPHY'
+            print len(hits)
+            hits.append(Article(current, 'Philosophy'))
+            print len(hits)
             break
         
         print 'Trying: %s' % current

@@ -15,9 +15,11 @@ user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_7) AppleWebKit/534.24 
 stop_url = 'http://en.wikipedia.org/wiki/Philosophy'
 
 
-def crawl(current, terms=None):
+def crawl(url, terms=None):
     count = 0
+    current = url
     hits = []
+    hist = []
     
     while True:
         if count >= max_hops:
@@ -36,6 +38,11 @@ def crawl(current, terms=None):
             break
         
         print 'Trying: %s' % current
+    
+        if current in hist:
+            print 'Loop Detected for: %s' % url
+            break
+        hist.append(current)
     
         try:
             request = urllib2.Request(current, headers={'User-Agent': user_agent})
@@ -83,6 +90,9 @@ def crawl(current, terms=None):
     return hits
 
 if __name__ == '__main__':
-    hits = crawl(sys.argv[1] if len(sys.argv) > 1 else 'http://en.wikipedia.org/wiki/Special:Random')
-    print hits
+    try:
+        hits = crawl(sys.argv[1] if len(sys.argv) > 1 else 'http://en.wikipedia.org/wiki/Special:Random')
+        print hits
+    except KeyboardInterrupt:
+        print 'Quitting...'
     
